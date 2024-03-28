@@ -1,22 +1,24 @@
 const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
-const uploadImage = require("../utils/uploadCloudinary")
+const uploadImage = require("../utils/uploadCloudinary");
 const fetchUserId = require("../middleware/fetchUserId");
 
-
 // Route : to update or edit user profile.
-router.get("/edit-profile", fetchUserId, async (req, res) => {
+router.post("/edit-profile", fetchUserId, async (req, res) => {
   try {
     const { name, picture } = req.body;
     const userDocument = await User.findById({ _id: req.userId });
-    if (userDocument) { 
+    if (userDocument) {
       // updating the name field.
       userDocument.name = name;
       // Check if the picture field is present in the request
-      if (picture !== undefined) {
+      if (picture) {
         // Update the picture field only if a new picture is provided
         const imageUrl = await uploadImage(picture);
+        if (imageUrl) {
+        userDocument.picture = imageUrl;
+        }
       }
       await userDocument.save();
     } else {

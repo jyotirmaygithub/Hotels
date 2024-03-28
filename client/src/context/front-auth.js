@@ -6,14 +6,14 @@ import { StateContext } from "./States";
 const FrontAuthContext = createContext();
 
 export function AuthFunction(props) {
-  const { getAuthToken,checkCookie } = TokenStatusContext();
+  const { getAuthToken, checkCookie } = TokenStatusContext();
   const { setUserDocument } = StateContext();
 
-  useEffect(()=>{
-    if(checkCookie){
-      handleExistingUserData()
+  useEffect(() => {
+    if (checkCookie) {
+      handleExistingUserData();
     }
-  },[])
+  }, []);
 
   // function  : To store auth token in the cookie..
   function storeAuthToken(userAuth_Token) {
@@ -142,11 +142,36 @@ export function AuthFunction(props) {
     }
   }
 
+  // Route 6 : To edit the profile of the user.
+  async function handleEditProfile(name, picture) {
+    try {
+      const response = await fetch(
+        `${process.env.REACT_APP_DEV_URL}/api/editProfile/edit-profile`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "auth-token": getAuthToken(),
+          },
+          body: JSON.stringify({ name, picture }),
+        }
+      );
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      return { success: true, message: "Profile has been updated!" };
+    } catch (error) {
+      console.error("Error creating user:", error.message);
+      return { success: false, message: error.message };
+    }
+  }
+
   return (
     <FrontAuthContext.Provider
       value={{
         handleCreateUser,
-        // handleExistingUser,
+        handleExistingUser,
+        handleEditProfile,
         handleGoogleLogin,
         handleExistingUserData,
       }}
